@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOOTVERSE — The Collection Never Ends</title>
+<style>
+:root{
+  color-scheme:dark;--bg:#080a12;--panel:#111522;--panel2:#191f30;
+  --line:#30384f;--text:#edf2ff;--muted:#929db6;
+  --gold:#f3ca7b;--accent:#9988ff;--green:#66e3b0;--red:#ff7285
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#29244c,transparent 55%),var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.top{position:sticky;top:0;z-index:30;background:#0b0e18ed;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:14px 22px}
+.toprow,.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:950;letter-spacing:3px}
+.logo span{color:var(--gold)}
+.stats{display:flex;gap:20px;flex-wrap:wrap}
+.stat small{display:block;color:var(--muted);font-size:11px}
+.stat strong{font-size:15px}
+.progressrow{display:flex;align-items:center;gap:12px;margin-top:14px}
+.progress{height:8px;background:#282d40;border-radius:99px;overflow:hidden;flex:1}
+.progress>div{height:100%;background:linear-gradient(90deg,#8d79ff,#f3d38d);transition:width .3s}
+.progressrow strong{color:var(--gold)}
+.layout{display:flex;min-height:calc(100vh - 110px)}
+.sidebar{position:sticky;top:112px;height:calc(100vh - 112px);width:220px;flex-shrink:0;padding:14px 12px;background:#0c101a;border-right:1px solid var(--line);transition:width .2s;overflow-y:auto;overflow-x:hidden}
+.sidebar.collapsed{width:48px;padding:12px 5px}
+.sidebar.collapsed .sideheading,.sidebar.collapsed .nav .label{display:none}
+.toggle{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--gold);margin-bottom:15px}
+.nav{display:grid;gap:5px}
+.nav button{border:1px solid transparent;background:transparent;color:#b4bed2;text-align:left;padding:11px 9px;border-radius:9px;white-space:nowrap}
+.nav button:hover{background:#1b2133;color:white}
+.nav button.active{background:linear-gradient(100deg,#30294e,#171d2d);border-color:#514879;color:white}
+.ico{display:inline-block;width:27px;text-align:center}
+.sideheading{font-size:10px;letter-spacing:2px;color:var(--muted);margin:0 10px 12px}
+main{flex:1;min-width:0;width:100%;max-width:1600px;margin:0 auto;padding:26px clamp(12px,3vw,38px)}
+.page{display:none}.page.active{display:block}
+h1{font-size:clamp(25px,3vw,35px);letter-spacing:-1px;margin:0 0 6px}
+h2{font-size:20px;margin:0 0 12px}
+h3{font-size:15px;margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:13px}
+.card,.item-card{border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#171d2d,#101420);padding:15px;min-width:0}
+.card p{color:var(--muted);margin:5px 0}
+.big{font-size:25px;font-weight:850;letter-spacing:-.7px;overflow-wrap:anywhere}
+.gold{color:var(--gold)}.green{color:var(--green)}.muted{color:var(--muted)}
+.btn{border:1px solid #3b4560;background:#20283a;color:var(--text);border-radius:9px;padding:9px 13px;transition:filter .15s,transform .15s}
+.btn:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(110deg,#8d79ff,#6b5bd0);border-color:#a89aff;color:white;font-weight:750}
+.btn.goldbtn{background:linear-gradient(110deg,#e8c77d,#bd8c42);color:#17120a;border-color:#ffe3a4;font-weight:800}
+.btn.danger{border-color:#773847;color:#ff9ba8}.field{background:#090d16;border:1px solid #333d55;color:white;border-radius:8px;padding:9px 10px;max-width:100%;min-width:0}
+.filters,.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.fieldgroup{display:flex;flex-direction:column;gap:5px}
+label{color:var(--muted);font-size:12px}
+.boxstage{text-align:center;padding:30px 15px;border:1px solid #42385c;border-radius:17px;background:radial-gradient(ellipse at 50% 20%,#383057,transparent 60%),#111522;margin-bottom:18px}
+.boxemoji{font-size:85px;display:block;filter:drop-shadow(0 12px 20px #0009)}
+.opening{animation:openbox .65s ease-in-out}
+@keyframes openbox{20%{transform:scale(1.13) rotate(-8deg)}40%{transform:scale(1.13) rotate(8deg)}65%{transform:scale(1.25);filter:drop-shadow(0 0 25px #f4ce7a)}100%{transform:scale(1)}}
+.item-card{position:relative;overflow:hidden;animation:appear .2s ease-out}
+@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.item-card:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--rarity)}
+.item-icon{font-size:34px;margin:5px 0}
+.item-name{font-weight:750;overflow-wrap:anywhere}
+.item-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.rarity{font-size:11px;font-weight:850;letter-spacing:.7px;color:var(--rarity)}
+.item-card .actions{margin-top:10px}
+.item-card .btn{padding:7px 9px;font-size:12px}
+.common{--rarity:#a5afc2}.uncommon{--rarity:#65dca5}.rare{--rarity:#67b9ff}
+.epic{--rarity:#b58aff}.legendary{--rarity:#ffcf6e}.mythic{--rarity:#ff7b9e}
+.divine{--rarity:#70f2ef}.cosmic{--rarity:#e39aff}.transcendent{--rarity:#fff0b1}.eternal{--rarity:#ff8c58}
+.sep{height:1px;background:var(--line);margin:22px 0}
+.note{font-size:12px;color:var(--muted)}
+.empty{padding:30px 12px;text-align:center;color:var(--muted);border:1px dashed #38415a;border-radius:12px}
+.pager{display:flex;justify-content:center;align-items:center;gap:12px;margin:22px 0}
+.modal{position:fixed;inset:0;background:#050711df;backdrop-filter:blur(8px);z-index:90;display:none;place-items:center;padding:16px}
+.modal.show{display:grid}
+.modalbox{width:min(700px,100%);max-height:86vh;overflow:auto;border:1px solid #51496e;border-radius:18px;padding:22px;background:linear-gradient(145deg,#1a2031,#0d111b);box-shadow:0 30px 100px #000a}
+.reward{text-align:center;font-size:65px;margin:12px}
+.resultlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px}
+.result{border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:#20283a;border:1px solid #4c5876;border-radius:12px;padding:12px 18px;z-index:100;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 12px 40px #0008;max-width:90vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.settingsrow{padding:14px 0;border-bottom:1px solid var(--line)}
+@media(max-width:700px){
+ .top{padding:12px}.toprow{align-items:flex-start}.stats{gap:12px}
+ .sidebar{top:130px;height:calc(100vh - 130px);width:48px;padding:10px 5px}
+ .sidebar:not(.collapsed){width:180px}
+ .sidebar:not(.collapsed) .sideheading,.sidebar:not(.collapsed) .nav .label{display:initial}
+ main{padding:18px 10px}.logo{font-size:18px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="toprow">
+  <div class="logo">LOOT<span>VERSE</span></div>
+  <div class="stats">
+   <div class="stat"><small>GUTHABEN</small><strong class="gold" id="money">$500</strong></div>
+   <div class="stat"><small>EINKOMMEN / SEK.</small><strong class="green" id="income">$0</strong></div>
+   <div class="stat"><small>ENTDECKT</small><strong id="discovered">0 / 2500</strong></div>
+  </div>
+ </div><div class="progressrow"><span class="muted">CODEX</span><div class="progress"><div id="progressbar"></div></div><strong id="percent">0.00%</strong></div>
+</header>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+ <button class="toggle" id="toggleSidebar" title="Menü ein- oder ausklappen">☰</button>
+ <div class="sideheading">DEIN UNIVERSUM</div>
+ <nav class="nav" id="nav">
+  <button class="active" data-page="home"><span class="ico">⌂</span><span class="label">Übersicht</span></button>
+  <button data-page="boxes"><span class="ico">▣</span><span class="label">Boxen öffnen</span></button>
+  <button data-page="codex"><span class="ico">▤</span><span class="label">Codex</span></button>
+  <button data-page="fusion"><span class="ico">⧉</span><span class="label">Fusion</span></button>
+  <button data-page="abilities"><span class="ico">✧</span><span class="label">Fähigkeiten</span></button>
+  <button data-page="secrets"><span class="ico">♙</span><span class="label">Geheimnisse</span></button>
+  <button data-page="stats"><span class="ico">◷</span><span class="label">Statistiken</span></button>
+  <button data-page="settings"><span class="ico">⚙</span><span class="label">Einstellungen</span></button>
+ </nav>
+</aside>
+
+<main>
+<section class="page active" id="page-home">
+ <h1>Dein Universum.</h1><p class="sub">Entdecke Relikte, sammle Reichtümer und vervollständige den Codex.</p>
+ <div class="grid">
+  <div class="card"><p>Entdeckte Arten</p><div class="big" id="homeDiscovered">0 / 2500</div></div>
+  <div class="card"><p>Items auf Level 3</p><div class="big gold" id="homeMax">0</div></div>
+  <div class="card"><p>Gesamtlevel</p><div class="big" id="homeLevels">0</div></div>
+  <div class="card"><p>Geöffnete Boxen</p><div class="big" id="homeBoxes">0</div></div>
+ </div>
+ <div class="sep"></div><div class="row"><h2>Letzte Entdeckungen</h2><button class="btn" data-goto="gallery">Galerie öffnen →</button></div>
+ <div class="grid" id="homeItems"></div>
+ <div class="sep"></div><h2>Seltenheitsübersicht</h2><div class="grid" id="homeRarities"></div>
+</section>
+
+<section class="page" id="page-boxes">
+ <h1>Die Schatzkammer</h1><p class="sub">Deine nächste große Entdeckung wartet vielleicht in der nächsten Box.</p>
+ <div class="boxstage">
+  <span class="boxemoji" id="boxEmoji">📦</span><h2>LOOT CRATE</h2>
+  <p class="muted">Jede Box enthält ein zufälliges Item.</p>
+  <div class="big gold" id="boxPrice">$100</div><p class="note" id="boxPriceInfo"></p>
+  <div class="actions" style="justify-content:center;align-items:end">
+   <div class="fieldgroup" style="width:150px;text-align:left"><label for="boxAmount">Anzahl öffnen (1–100)</label><input class="field" id="boxAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="Anzahl"></div>
+   <button class="btn goldbtn" id="openBoxes">BOXEN ÖFFNEN</button>
+  </div>
+  <p class="note" id="totalCost">Gesamtpreis: $100</p>
+ </div>
+ <h2>Seltenheitsstufen</h2><div class="grid" id="boxRarities"></div>
+ <div class="sep"></div><h2>Letzte Entdeckungen</h2><div class="grid" id="recentItems"></div>
+</section>
+
+<section class="page" id="page-codex">
+ <h1>Der Codex</h1><p class="sub">2.500 Items. Drei Level pro Item. Ein Ziel: 100%.</p>
+ <div class="grid">
+  <div class="card"><p>Entdeckt</p><div class="big" id="codexCount">0 / 2500</div></div>
+  <div class="card"><p>Level 3</p><div class="big gold" id="codexMax">0 / 2500</div></div>
+  <div class="card"><p>Fortschritt</p><div class="big green" id="codexPercent">0%</div></div>
+ </div>
+ <div class="filters">
+  <input class="field" id="searchItems" placeholder="Item suchen …"><select class="field" id="filterRarity"><option value="">Alle Seltenheiten</option></select>
+  <select class="field" id="filterStatus"><option value="all">Alle Items</option><option value="owned">Gesammelt</option><option value="missing">Nicht entdeckt</option><option value="incomplete">Nicht Level 3</option><option value="complete">Level 3</option></select>
+  <select class="field" id="sortItems"><option value="id">Standard</option><option value="rarity">Seltenheit</option><option value="income">Einkommen</option><option value="name">Name A–Z</option><option value="level">Level</option></select>
+ </div>
+ <div class="row"><span class="muted" id="codexShowing">0 Items</span><span class="muted">50 Items pro Seite</span></div>
+ <div class="grid" id="codexGrid"></div>
+ <div class="pager"><button class="btn" id="prevPage">← Zurück</button><span id="pageNumber">Seite 1</span><button class="btn" id="nextPage">Weiter →</button></div>
+ <div class="sep"></div><h2>Seltenheitsstatistik</h2><div class="grid" id="codexRarities"></div>
+</section>
+
+<section class="page" id="page-gallery">
+ <h1>Item-Galerie</h1><p class="sub">Betrachte deine Sammlung und entdecke die Geschichten hinter jedem Relikt.</p>
+ <div class="grid">
+  <div class="card"><p>Gefundene Items</p><div class="big" id="galleryFound">0</div></div>
+  <div class="card"><p>Gespeicherte Funddaten</p><div class="big" id="galleryHistory">0</div></div>
+ </div>
+ <div class="filters">
+  <input class="field" id="gallerySearch" placeholder="Name oder Beschreibung suchen …">
+  <select class="field" id="galleryFilter"><option value="all">Alle Items</option><option value="owned">Nur entdeckte</option><option value="missing">Noch unbekannt</option><option value="special">Mit Fähigkeit</option></select>
+  <select class="field" id="gallerySort"><option value="id">Standard</option><option value="rarity">Seltenheit</option><option value="name">Name A–Z</option><option value="level">Level</option></select>
+ </div>
+ <div class="row"><span class="muted" id="galleryShowing">0 Items</span><span class="muted">40 Items pro Seite</span></div>
+ <div class="grid" id="galleryGrid"></div>
+ <div class="pager"><button class="btn" id="galleryPrev">← Zurück</button><span id="galleryPageNumber">Seite 1</span><button class="btn" id="galleryNext">Weiter →</button></div>
+</section>
+
+<section class="page" id="page-fusion">
+ <h1>Fusionslabor</h1><p class="sub">Zwei gleiche Exemplare ergeben ein Item mit höherem Level.</p>
+ <div class="grid"><div class="card"><p>Verfügbare Fusionen</p><div class="big gold" id="fusionCount">0</div></div><div class="card"><p>Regel</p><div class="big">2 → 1</div><p>Fusionen sind bis Level 3 möglich.</p></div></div>
+ <div class="filters"><input class="field" id="searchFusion" placeholder="Item suchen …"><select class="field" id="sortFusion"><option value="rarity">Seltenheit</option><option value="name">Name A–Z</option><option value="level">Level</option></select></div>
+ <div class="grid" id="fusionGrid"></div><div id="fusionEmpty" class="empty" hidden>Keine Fusionen verfügbar. Öffne weitere Boxen!</div>
+</section>
+
+<section class="page" id="page-abilities">
+ <h1>Besondere Fähigkeiten</h1><p class="sub">Genau 100 Items besitzen eine besondere Fähigkeit, die auf Level 3 aktiv wird.</p>
+ <div class="grid"><div class="card"><p>Fähigkeiten aktiv</p><div class="big gold" id="abilitiesFound">0 / 100</div></div><div class="card"><p>Offline-Limit</p><div class="big" id="offlineBonus">120 Minuten</div></div><div class="card"><p>Einkommensmultiplikator</p><div class="big green" id="multiplier">×1,00</div></div></div>
+ <div class="sep"></div><h2>Fähigkeiten im Codex</h2><div class="grid" id="abilityGrid"></div>
+</section>
+
+<section class="page" id="page-secrets"><h1>Geheimnisse</h1><p class="sub">Nicht jede Entdeckung ist offensichtlich. Erfülle besondere Bedingungen, um geheime Erfolge freizuschalten.</p>
+ <div class="grid" id="secretGrid"></div>
+ <div class="sep"></div><h2>Geheime Entdeckungen</h2><div class="grid" id="secretItems"></div>
+</section>
+
+<section class="page" id="page-stats">
+ <h1>Statistiken</h1><p class="sub">Deine Reise durch das LOOTVERSE – jeder Fund zählt.</p>
+ <div class="grid">
+  <div class="card"><p>Spielzeit</p><div class="big" id="statPlaytime">0 Min.</div></div>
+  <div class="card"><p>Geöffnete Boxen</p><div class="big" id="statBoxes">0</div></div>
+  <div class="card"><p>Gefundene Item-Arten</p><div class="big" id="statFound">0</div></div>
+  <div class="card"><p>Fusionen</p><div class="big" id="statFusions">0</div></div>
+  <div class="card"><p>Aktuelles Einkommen</p><div class="big green" id="statIncome">$0/s</div></div>
+  <div class="card"><p>Höchster Kontostand</p><div class="big gold" id="statRichest">$500</div></div>
+  <div class="card"><p>Geheimnisse entdeckt</p><div class="big" id="statSecrets">0</div></div>
+  <div class="card"><p>Gesamtlevel</p><div class="big" id="statLevels">0</div></div>
+ </div>
+ <div class="sep"></div><h2>Deine Meilensteine</h2><div class="grid" id="milestoneGrid"></div>
+ <div class="sep"></div><h2>Spielstand</h2><p class="muted">Exportiere regelmäßig eine Sicherungskopie.</p><div class="actions"><button class="btn" id="exportSave">Spielstand exportieren</button><button class="btn danger" id="resetAll">Reset All</button></div>
+</section>
+
+<section class="page" id="page-settings">
+ <h1>Einstellungen</h1><p class="sub">Passe dein Spielerlebnis an.</p>
+ <div class="card">
+  <div class="settingsrow row"><div><h3>Soundeffekte</h3><p class="muted">Sounds beim Öffnen und Fusionieren.</p></div><input type="checkbox" id="soundEnabled" checked></div>
+  <div class="settingsrow"><label for="soundVolume">Lautstärke</label><input id="soundVolume" type="range" min="0" max="100" value="35" style="width:100%"><span class="muted" id="volumeText">35%</span></div>
+  <div class="settingsrow row"><div><h3>Spielstand exportieren</h3><p class="muted">Sicherheitskopie herunterladen.</p></div><button class="btn" id="exportSave2">Exportieren</button></div>
+  <div class="settingsrow row"><div><h3>Spielstand importieren</h3><p class="muted">Eine Sicherung wiederherstellen.</p></div><button class="btn" id="importSave">Importieren</button><input id="importFile" type="file" accept=".json,application/json" hidden></div>
+  <div class="settingsrow row"><div><h3>Reset All</h3><p class="muted">Setzt deinen gesamten Spielstand zurück.</p></div><button class="btn danger" id="resetAll2">Alles zurücksetzen</button></div>
+ </div>
+ <p class="note" style="margin-top:18px">Der Spielstand wird lokal in diesem Browser gespeichert. Exportiere eine Sicherung, bevor du Browserdaten löschst.</p>
+</section>
+</main>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+ <div class="modalbox"><div class="row"><h2 id="modalTitle">Entdeckung</h2><button class="btn" id="closeModal">✕</button></div><div id="modalContent"></div><div class="actions"><button class="btn primary" id="modalOk">Weiter</button></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+const SAVE_KEY="lootverse_save_v2";
+const TOTAL=2500,PAGE_SIZE=50,GALLERY_SIZE=40,BASE_PRICE=100,GROWTH=1.08;
+const BASE_OFFLINE=7200;
+const RARITIES=[
+ {name:"Common",weight:4500,mult:1,color:"common"},
+ {name:"Uncommon",weight:2500,mult:2,color:"uncommon"},
+ {name:"Rare",weight:1400,mult:5,color:"rare"},
+ {name:"Epic",weight:750,mult:12,color:"epic"},
+ {name:"Legendary",weight:400,mult:30,color:"legendary"},
+ {name:"Mythic",weight:220,mult:80,color:"mythic"},{name:"Divine",weight:120,mult:220,color:"divine"},
+ {name:"Cosmic",weight:65,mult:650,color:"cosmic"},
+ {name:"Transcendent",weight:30,mult:2000,color:"transcendent"},
+ {name:"Eternal",weight:15,mult:7500,color:"eternal"}
+];
+const PREFIXES=["Ancient","Astral","Golden","Forgotten","Crystal","Shadow","Neon","Royal","Frozen","Solar","Lunar","Phantom","Quantum","Void","Arcane","Prismatic","Celestial","Obsidian","Radiant","Eternal","Mystic","Cyber","Emerald","Scarlet","Titan","Stellar","Dream","Silent","Runic","Nova","Glitched","Spectral","Amber","Tempest","Velvet","Chrono","Sapphire","Infernal","Hollow","Infinite","Lost","Prime","Twilight","Cursed","Blessed","Electric","Wild","Cosmic","Secret","Alpha"];
+const OBJECTS=["Coin","Crown","Key","Orb","Relic","Crystal","Mask","Ring","Amulet","Compass","Lantern","Mirror","Gem","Artifact","Medallion","Hourglass","Feather","Dagger","Totem","Scroll","Cube","Star","Prism","Idol","Fragment","Badge","Charm","Trophy","Emblem","Stone","Heart","Token","Core","Beacon","Lens","Seal","Rune","Pendant","Clock","Shard","Vessel","Sigil","Pearl","Egg","Gear","Chest","Flame","Eye","Book","Crest"];
+const ICONS=["💎","👑","🗝️","🔮","🏺","💠","🎭","💍","📿","🧭","🏮","🪞","💎","🗿","🥇","⌛","🪶","🗡️","🪬","📜","🧊","⭐","🔷","🗽","🔹","🎖️","✨","🏆","🔰","🪨","💖","🪙","⚙️","📡","🔍","🔏","ᛟ","📿","🕰️","💎","🏆","🔯","🦪","🥚","⚙️","📦","🔥","👁️","📕","🛡️"];
+const SPECIALS=[
+ {name:"Offline-Archiv",desc:"+1 Stunde Offline-Einkommen für immer in diesem Spielstand.",type:"offline",value:3600},
+ {name:"Goldener Multiplikator",desc:"Erhöht dein gesamtes Einkommen dauerhaft um ×1,5.",type:"multiplier",value:1.5},
+ {name:"Kosmischer Multiplikator",desc:"Erhöht dein gesamtes Einkommen dauerhaft um ×2.",type:"multiplier",value:2}
+];
+const STORIES=[
+ "Dieses Relikt stammt aus einer längst vergessenen Zivilisation. Seine wahre Herkunft bleibt unbekannt.",
+ "Alte Aufzeichnungen berichten von diesem Gegenstand als Symbol einer verlorenen Dynastie.",
+ "Man sagt, dieses Objekt habe eine Reise durch unbekannte Dimensionen überstanden.",
+ "Seine Oberfläche trägt Spuren einer Energie, die selbst moderne Forscher nicht erklären können.",
+ "Dieses seltene Sammlerstück wurde nur in wenigen historischen Dokumenten erwähnt.",
+ "Eine Legende behauptet, dass dieses Objekt einst über ein verborgenes Reich wachte.",
+ "Niemand weiß, wer dieses Artefakt erschaffen hat. Seine Verarbeitung ist ihrer Zeit weit voraus.",
+ "Dieses geheimnisvolle Objekt scheint auf die Energie anderer Relikte zu reagieren.",
+ "Ein unbekannter Reisender hinterließ dieses Relikt an einem Ort, den heute niemand mehr findet.",
+ "Dieses Sammlerstück gilt als Zeichen für Glück, Ausdauer und außergewöhnliche Entdeckungen."
+];
+const ITEMS=[];
+function rarityForIndex(i){
+ const roll=(i*7919+Math.floor(i/7)*104729+37)%10000;
+ let sum=0;
+ for(let r=0;r<RARITIES.length;r++){sum+=RARITIES[r].weight;if(roll<sum)return r}
+ return 0;
+}
+for(let i=0;i<TOTAL;i++){
+ const ri=rarityForIndex(i),r=RARITIES[ri];
+ let ability=null;
+ if(i<100) ability=SPECIALS[i%3];
+ ITEMS.push({
+  id:i,name:`${PREFIXES[Math.floor(i/50)%PREFIXES.length]} ${OBJECTS[i%OBJECTS.length]} #${String(i+1).padStart(4,"0")}`,
+  icon:ICONS[i%ICONS.length],rarityIndex:ri,rarity:r.name,rarityClass:r.color,
+  multiplier:r.mult,special:i<100,ability,
+  description:`${STORIES[(i*7+Math.floor(i/13))%STORIES.length]} ${PREFIXES[Math.floor(i/50)%PREFIXES.length]} ${OBJECTS[i%OBJECTS.length]} besitzt eine einzigartige Geschichte. Entdeckungs-ID: ${String(i+1).padStart(4,"0")}.`
+ });
+}
+
+function defaultState(){
+ return {
+  money:500,totalBoxes:0,inventory:{},lastSeen:Date.now(),
+  soundEnabled:true,soundVolume:35,sidebarCollapsed:false,recent:[],
+  stats:{playSeconds:0,fusions:0,richest:500,firstStarted:Date.now()},
+  secrets:{},lastOfflineReport:0
+ };
+}let state=defaultState(),currentPage=1,galleryPage=1,boxOpening=false,audioContext=null,toastTimer=null,lastTick=performance.now();
+const $=id=>document.getElementById(id);
+
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function formatMoney(n){
+ n=Number(n)||0;
+ if(Math.abs(n)<1000)return "$"+Math.floor(n).toLocaleString("de-DE");
+ const units=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No"];
+ let i=-1;while(Math.abs(n)>=1000&&i<units.length-1){n/=1000;i++}
+ return "$"+n.toLocaleString("de-DE",{maximumFractionDigits:2})+units[i];
+}
+function fmtDate(value){
+ if(!value)return "Noch nicht entdeckt";
+ return new Date(value).toLocaleString("de-DE",{dateStyle:"medium",timeStyle:"short"});
+}
+function fmtDuration(s){
+ s=Math.max(0,Math.floor(s));
+ const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+ return h?`${h} Std. ${m} Min.`:m?`${m} Min. ${sec} Sek.`:`${sec} Sek.`;
+}
+function loadState(){
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(!raw)return;
+  const s=JSON.parse(raw);
+  if(!s||typeof s!=="object")return;
+  state={...defaultState(),...s,stats:{...defaultState().stats,...s.stats},inventory:s.inventory&&typeof s.inventory==="object"?s.inventory:{}};
+  state.money=Math.max(0,Number(state.money)||0);
+  state.totalBoxes=Math.max(0,Number(state.totalBoxes)||0);
+  state.lastSeen=Number(state.lastSeen)||Date.now();
+ }catch(e){state=defaultState()}
+}
+function saveState(){
+ state.lastSeen=Date.now();
+ try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){console.warn("Speichern fehlgeschlagen",e)}
+}
+function getOwned(id){
+ const o=state.inventory[id];
+ return o?{count:Number(o.count)||0,level:Number(o.level)||1,foundAt:o.foundAt||null,upgrades:Array.isArray(o.upgrades)?o.upgrades:[]}:{count:0,level:0,foundAt:null,upgrades:[]};
+}
+function uniqueCount(){return Object.values(state.inventory).filter(o=>o.count>0).length}
+function maxedCount(){return Object.values(state.inventory).filter(o=>o.count>0&&o.level>=3).length}
+function totalLevels(){return Object.values(state.inventory).reduce((s,o)=>s+(o.count>0?(Number(o.level)||1):0),0)}
+function getOfflineLimit(){
+ let bonus=0;
+ for(const [id,o] of Object.entries(state.inventory)){
+  const item=ITEMS[Number(id)];
+  if(o.count>0&&o.level>=3&&item?.ability?.type==="offline")bonus+=item.ability.value;
+ }
+ return BASE_OFFLINE+bonus;
+}
+function getIncomeMultiplier(){
+ let m=1;
+ for(const [id,o] of Object.entries(state.inventory)){
+  const item=ITEMS[Number(id)];
+  if(o.count>0&&o.level>=3&&item?.ability?.type==="multiplier")m*=item.ability.value;
+ }
+ return m;
+}
+function incomePerSecond(){
+ let n=0;
+ for(const [id,o] of Object.entries(state.inventory)){
+  if(o.count<=0)continue;
+  n+=ITEMS[Number(id)].multiplier*(Number(o.level)||1);
+ }
+ return n*getIncomeMultiplier();
+}
+function itemIncome(item,level){return item.multiplier*level*getIncomeMultiplier()}
+function addItem(id){
+ const key=String(id),now=Date.now();
+ if(!state.inventory[key])state.inventory[key]={count:1,level:1,foundAt:now,upgrades:[]};
+ else state.inventory[key].count++;
+ state.recent.unshift(id);state.recent=state.recent.slice(0,20);
+}
+function showToast(message){
+ const el=$("toast");el.textContent=message;el.classList.add("show");
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600);
+}
+function showModal(title,html){
+ $("modalTitle").textContent=title;$("modalContent").innerHTML=html;$("modal").classList.add("show");
+}
+function closeModal(){$("modal").classList.remove("show")}
+function showPage(name){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ $("page-"+name)?.classList.add("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
+ if(name==="codex")renderCodex();
+ if(name==="gallery")renderGallery();
+ if(name==="fusion")renderFusion();
+ if(name==="abilities")renderAbilities();
+ if(name==="boxes")renderBoxes();
+ if(name==="home")renderHome();
+ if(name==="secrets")renderSecrets();
+ if(name==="stats")renderStats();
+}
+function playSound(type){
+ if(!state.soundEnabled||state.soundVolume<=0)return;
+ try{
+  audioContext=audioContext||new(window.AudioContext||window.webkitAudioContext)();
+  if(audioContext.state==="suspended")audioContext.resume();
+  const now=audioContext.currentTime,vol=state.soundVolume/100*.1;
+  const notes=type==="fusion"?[440,660,880]:type==="reward"?[520,740,1040]:[240,360,520];
+  notes.forEach((f,i)=>{
+   const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+   osc.type=type==="fusion"?"triangle":"sine";
+   osc.frequency.setValueAtTime(f,now+i*.09);
+   gain.gain.setValueAtTime(.001,now+i*.09);
+   gain.gain.exponentialRampToValueAtTime(Math.max(.002,vol),now+i*.09+.02);
+   gain.gain.exponentialRampToValueAtTime(.001,now+i*.09+.18);
+   osc.connect(gain);gain.connect(audioContext.destination);
+   osc.start(now+i*.09);osc.stop(now+i*.09+.2);
+  });
+ }catch(e){}
+}
+
+/* Geheimnisse werden automatisch geprüft. */
+const SECRET_DEFS=[
+ {id:"first",name:"Der Anfang",icon:"🌱",desc:"Öffne deine erste Box.",check:()=>state.totalBoxes>=1,reward:100},
+ {id:"collector10",name:"Kleiner Sammler",icon:"🧺",desc:"Entdecke 10 verschiedene Items.",check:()=>uniqueCount()>=10,reward:500},
+ {id:"collector100",name:"Sammlerlegende",icon:"🏛️",desc:"Entdecke 100 verschiedene Items.",check:()=>uniqueCount()>=100,reward:5000},
+ {id:"boxes100",name:"Unermüdlich",icon:"📦",desc:"Öffne insgesamt 100 Boxen.",check:()=>state.totalBoxes>=100,reward:2500},
+ {id:"fusion1",name:"Alchemie",icon:"⚗️",desc:"Führe deine erste Fusion durch.",check:()=>state.stats.fusions>=1,reward:300},
+ {id:"level3",name:"Perfektion",icon:"✨",desc:"Bringe ein Item auf Level 3.",check:()=>maxedCount()>=1,reward:1000},
+ {id:"cosmic",name:"Jenseits der Sterne",icon:"🌌",desc:"Entdecke ein Cosmic-Item oder höher.",check:()=>Object.keys(state.inventory).some(id=>state.inventory[id].count>0&&ITEMS[+id].rarityIndex>=7),reward:5000},
+ {id:"rich",name:"Vermögen",icon:"💰",desc:"Erreiche einen Kontostand von 100.000 $.",check:()=>state.money>=100000,reward:10000}
+];
+function checkSecrets(){
+ for(const s of SECRET_DEFS){
+  if(!state.secrets[s.id]&&s.check()){
+   state.secrets[s.id]={unlockedAt:Date.now()};
+   state.money+=s.reward;
+   showToast(`Geheimnis entdeckt: ${s.name} · +${formatMoney(s.reward)}`);
+   playSound("reward");
+  }
+ }
+}
+function secretCount(){return Object.keys(state.secrets).length}
+
+/* Item-Karten und Details */
+function itemCard(item,buttons=true){
+ const o=getOwned(item.id);
+ const special=item.special?`<p class="note">✧ Fähigkeit · Aktiv ab Level 3</p>`:"";
+ return `<article class="item-card ${item.rarityClass}">
+  <div class="rarity">${item.rarity.toUpperCase()}</div><div class="item-icon">${item.icon}</div>
+  <div class="item-name">${escapeHTML(item.name)}</div>
+  <div class="item-meta">${o.count?`Besitz: ${o.count} · Level ${o.level}/3`:"Noch nicht entdeckt"}</div>
+  <div class="item-meta">${formatMoney(itemIncome(item,Math.max(1,o.level)))}/s pro Exemplar</div>
+  ${special}
+  ${buttons?`<div class="actions">${o.count>=2&&o.level<3?`<button class="btn primary" data-fuse="${item.id}">Fusionieren</button>`:""}<button class="btn" data-detail="${item.id}">Details</button></div>`:""}
+ </article>`;
+}
+function rarityCards(target){
+ $(target).innerHTML=RARITIES.map((r,i)=>{
+  const total=ITEMS.filter(x=>x.rarityIndex===i).length;const found=ITEMS.filter(x=>x.rarityIndex===i&&getOwned(x.id).count>0).length;
+  return `<div class="card ${r.color}"><div class="rarity">${r.name.toUpperCase()}</div><div class="big">${found} <span class="muted" style="font-size:14px">/ ${total}</span></div><p>${formatMoney(r.mult)}/s pro Level</p><div class="progress"><div style="width:${found/Math.max(1,total)*100}%;background:var(--rarity)"></div></div></div>`;
+ }).join("");
+}
+function renderHeader(){
+ $("money").textContent=formatMoney(state.money);
+ $("income").textContent=formatMoney(incomePerSecond());
+ $("discovered").textContent=`${uniqueCount()} / ${TOTAL}`;
+ const p=maxedCount()/TOTAL*100;
+ $("progressbar").style.width=p+"%";$("percent").textContent=p.toFixed(2)+"%";
+}
+function renderHome(){
+ $("homeDiscovered").textContent=`${uniqueCount()} / ${TOTAL}`;
+ $("homeMax").textContent=maxedCount();$("homeLevels").textContent=totalLevels();$("homeBoxes").textContent=state.totalBoxes;
+ const ids=[...new Set(state.recent)].slice(0,4);
+ $("homeItems").innerHTML=ids.length?ids.map(id=>itemCard(ITEMS[id])).join(""):`<div class="empty">Noch keine Items gesammelt. Öffne deine erste Box!</div>`;
+ rarityCards("homeRarities");
+}
+function boxPriceAt(index){return BASE_PRICE*Math.pow(GROWTH,index)}
+function boxTotalCost(amount){
+ if(amount<=0)return 0;
+ const r=Math.pow(GROWTH,amount);
+ return BASE_PRICE*Math.pow(GROWTH,state.totalBoxes)*(r-1)/(GROWTH-1);
+}
+function updateBoxCost(){
+ const amount=parseBoxAmount(),cost=boxTotalCost(amount);
+ $("totalCost").textContent=`Gesamtpreis: ${formatMoney(cost)}${amount?` für ${amount} Box${amount===1?"":"en"}`:""}`;
+ $("openBoxes").disabled=boxOpening||amount<1||state.money<cost;
+}
+function renderBoxes(){
+ $("boxPrice").textContent=formatMoney(boxPriceAt(state.totalBoxes));
+ $("boxPriceInfo").textContent=`Box #${state.totalBoxes+1} · +${Math.round((GROWTH-1)*100)}% Preis pro Box`;
+ updateBoxCost();rarityCards("boxRarities");
+ const ids=[...new Set(state.recent)].slice(0,8);
+ $("recentItems").innerHTML=ids.length?ids.map(id=>itemCard(ITEMS[id],false)).join(""):`<div class="empty">Deine Entdeckungen erscheinen hier.</div>`;
+}
+function parseBoxAmount(){
+ const raw=$("boxAmount").value.trim();
+ if(!raw)return 0;
+ if(!/^\d+$/.test(raw))return 0;
+ return Math.min(100,Math.max(0,Number(raw)));
+}
+function pickItem(){
+ const total=RARITIES.reduce((s,r)=>s+r.weight,0);
+ let roll=Math.random()*total,ri=0;
+ for(let i=0;i<RARITIES.length;i++){roll-=RARITIES[i].weight;if(roll<0){ri=i;break}}
+ const pool=ITEMS.filter(x=>x.rarityIndex===ri);
+ return pool[Math.floor(Math.random()*pool.length)].id;
+}
+async function openBoxes(){
+ if(boxOpening)return;
+ const amount=parseBoxAmount();
+ if(amount<1){showToast("Gib eine Anzahl zwischen 1 und 100 ein.");return}
+ const cost=boxTotalCost(amount);
+ if(state.money<cost){showToast("Du hast nicht genug Geld.");return}
+ boxOpening=true;state.money-=cost;$("openBoxes").disabled=true;
+ const emoji=$("boxEmoji");emoji.classList.remove("opening");void emoji.offsetWidth;emoji.classList.add("opening");
+ playSound("box");
+ const counts={};
+ for(let i=0;i<amount;i++){
+  const id=pickItem();addItem(id);counts[id]=(counts[id]||0)+1;
+ }
+ state.totalBoxes+=amount;
+ state.stats.richest=Math.max(state.stats.richest,state.money);
+ await new Promise(r=>setTimeout(r,650));
+ playSound("reward");checkSecrets();
+ const results=Object.entries(counts).map(([id,count])=>({item:ITEMS[+id],count})).sort((a,b)=>b.item.rarityIndex-a.item.rarityIndex);
+ const best=results[0].item;
+ showModal(amount===1?"Neue Entdeckung!":`${amount} Boxen geöffnet!`,`<div class="reward">${best.icon}</div><div style="text-align:center"><div class="rarity ${best.rarityClass}">${best.rarity.toUpperCase()}</div><h2>${escapeHTML(best.name)}</h2><p class="muted">Deine beste Entdeckung dieser Öffnung</p></div>
+ <div class="resultlist">${results.slice(0,16).map(({item,count})=>`<div class="result"><div style="font-size:28px">${item.icon}</div><div class="rarity ${item.rarityClass}">${item.rarity}</div><strong>${escapeHTML(item.name)}</strong><div class="note">×${count} · Level ${getOwned(item.id).level}</div></div>`).join("")}</div>
+ ${results.length>16?`<p class="note">Und ${results.length-16} weitere Item-Arten.</p>`:""}<p class="muted" style="text-align:center">Ausgegeben: ${formatMoney(cost)}</p>`);
+ saveState();renderAll();boxOpening=false;updateBoxCost();
+}
+function getFusionCandidates(){return ITEMS.filter(i=>{const o=getOwned(i.id);return o.count>=2&&o.level<3})}
+function fuseItem(id){
+ const o=getOwned(id);if(o.count<2||o.level>=3)return;
+ const now=Date.now();o.count--;o.level++;
+ if(!o.upgrades.includes(o.level))o.upgrades.push(o.level);
+ if(!state.inventory[id].upgrades)state.inventory[id].upgrades=[];
+ state.inventory[id].count=o.count;state.inventory[id].level=o.level;
+ state.inventory[id].upgrades=o.upgrades;
+ if(!state.inventory[id].upgradeHistory)state.inventory[id].upgradeHistory={};
+ state.inventory[id].upgradeHistory[o.level]=now;
+ state.stats.fusions++;
+ playSound("fusion");checkSecrets();saveState();renderAll();
+ showModal("Fusion erfolgreich!",`<div class="reward">${ITEMS[id].icon}</div><h2 style="text-align:center">${escapeHTML(ITEMS[id].name)}</h2><p style="text-align:center">Das Item hat Level ${o.level} erreicht!</p><div class="progress"><div style="width:${o.level/3*100}%"></div></div><p class="muted">Upgrade gespeichert: ${fmtDate(now)}</p>`);
+}
+function renderFusion(){
+ let list=getFusionCandidates(),q=$("searchFusion").value.trim().toLowerCase();
+ if(q)list=list.filter(i=>i.name.toLowerCase().includes(q));
+ const sort=$("sortFusion").value;
+ if(sort==="name")list.sort((a,b)=>a.name.localeCompare(b.name));
+ else if(sort==="level")list.sort((a,b)=>getOwned(a.id).level-getOwned(b.id).level);
+ else list.sort((a,b)=>b.rarityIndex-a.rarityIndex);
+ $("fusionCount").textContent=getFusionCandidates().length;
+ $("fusionEmpty").hidden=list.length>0;
+ $("fusionGrid").innerHTML=list.map(i=>{const o=getOwned(i.id);return `<article class="item-card ${i.rarityClass}"><div class="rarity">${i.rarity.toUpperCase()}</div><div class="item-icon">${i.icon}</div><div class="item-name">${escapeHTML(i.name)}</div><p class="item-meta">Level ${o.level}/3 · Besitz: ${o.count}</p><p class="item-meta">Nach Fusion: Level ${o.level+1}</p><div class="actions"><button class="btn primary" data-fuse="${i.id}">Jetzt fusionieren</button><button class="btn" data-detail="${i.id}">Historie</button></div></article>`}).join("");
+}
+
+/* Codex: nur 50 Karten gleichzeitig rendern, um Ruckeln zu reduzieren. */
+function renderCodex(){
+ const q=$("searchItems").value.trim().toLowerCase(),rarity=$("filterRarity").value,status=$("filterStatus").value,sort=$("sortItems").value;
+ let list=ITEMS.filter(i=>{
+  const o=getOwned(i.id);
+  if(q&&!i.name.toLowerCase().includes(q))return false;
+  if(rarity!==""&&i.rarityIndex!==+rarity)return false;
+  if(status==="owned"&&o.count===0)return false;
+  if(status==="missing"&&o.count>0)return false;
+  if(status==="incomplete"&&(o.count===0||o.level>=3))return false;
+  if(status==="complete"&&o.level!==3)return false;
+  return true;
+ });
+ list.sort((a,b)=>{
+  if(sort==="rarity")return b.rarityIndex-a.rarityIndex||a.id-b.id;
+  if(sort==="income")return b.multiplier-a.multiplier||a.id-b.id;
+  if(sort==="name")return a.name.localeCompare(b.name);if(sort==="level")return getOwned(b.id).level-getOwned(a.id).level||a.id-b.id;
+  return a.id-b.id;
+ });
+ const pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));currentPage=Math.max(1,Math.min(currentPage,pages));
+ $("codexGrid").innerHTML=list.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE).map(i=>itemCard(i)).join("")||`<div class="empty">Keine Items gefunden.</div>`;
+ $("codexShowing").textContent=`${list.length.toLocaleString("de-DE")} Items gefunden`;
+ $("pageNumber").textContent=`Seite ${currentPage} / ${pages}`;
+ $("prevPage").disabled=currentPage<=1;$("nextPage").disabled=currentPage>=pages;
+ $("codexCount").textContent=`${uniqueCount()} / ${TOTAL}`;
+ $("codexMax").textContent=`${maxedCount()} / ${TOTAL}`;
+ $("codexPercent").textContent=(maxedCount()/TOTAL*100).toFixed(2)+"%";
+ rarityCards("codexRarities");
+}
+
+/* Galerie */
+function renderGallery(){
+ const q=$("gallerySearch").value.trim().toLowerCase(),filter=$("galleryFilter").value,sort=$("gallerySort").value;
+ let list=ITEMS.filter(i=>{
+  const o=getOwned(i.id);
+  if(q&&!(`${i.name} ${i.description} ${i.ability?.desc||""}`).toLowerCase().includes(q))return false;
+  if(filter==="owned"&&o.count===0)return false;
+  if(filter==="missing"&&o.count>0)return false;
+  if(filter==="special"&&!i.special)return false;
+  return true;
+ });
+ if(sort==="rarity")list.sort((a,b)=>b.rarityIndex-a.rarityIndex||a.id-b.id);
+ if(sort==="name")list.sort((a,b)=>a.name.localeCompare(b.name));
+ if(sort==="level")list.sort((a,b)=>getOwned(b.id).level-getOwned(a.id).level||a.id-b.id);
+ const pages=Math.max(1,Math.ceil(list.length/GALLERY_SIZE));galleryPage=Math.max(1,Math.min(galleryPage,pages));
+ $("galleryFound").textContent=uniqueCount();
+ $("galleryHistory").textContent=Object.values(state.inventory).filter(o=>o.foundAt).length;
+ $("galleryShowing").textContent=`${list.length.toLocaleString("de-DE")} Items`;
+ $("galleryPageNumber").textContent=`Seite ${galleryPage} / ${pages}`;
+ $("galleryPrev").disabled=galleryPage<=1;$("galleryNext").disabled=galleryPage>=pages;
+ $("galleryGrid").innerHTML=list.slice((galleryPage-1)*GALLERY_SIZE,galleryPage*GALLERY_SIZE).map(i=>itemCard(i)).join("")||`<div class="empty">Keine Items gefunden.</div>`;
+}
+function showItemDetails(id){
+ const i=ITEMS[id],o=getOwned(id),owned=o.count>0;
+ const history=state.inventory[id]?.upgradeHistory||{};
+ const upgrades=[2,3].map(level=>`<div class="row"><span>Level ${level}</span><span class="muted">${history[level]?fmtDate(history[level]):"Noch nicht erreicht"}</span></div>`).join("");
+ showModal(i.name,`
+ <div class="reward">${i.icon}</div><div class="rarity ${i.rarityClass}" style="text-align:center">${i.rarity.toUpperCase()}</div>
+ <div class="card" style="margin-top:12px"><h3>📖 Geschichte</h3><p>${escapeHTML(i.description)}</p></div>
+ <div class="grid" style="margin-top:12px">
+  <div class="card"><p>Besitz</p><div class="big">${o.count}</div></div>
+  <div class="card"><p>Level</p><div class="big">${o.level||"—"} / 3</div></div>
+  <div class="card"><p>Einkommen pro Exemplar</p><div class="big green">${formatMoney(itemIncome(i,Math.max(1,o.level)))}/s</div></div>
+ </div>
+ <div class="card" style="margin-top:12px"><h3>🕰️ Fundhistorie</h3><p>Erstmals gefunden: ${fmtDate(o.foundAt)}</p><div class="sep"></div><h3>⬆️ Upgrade-Historie</h3>${upgrades}</div>
+ ${i.special?`<div class="card" style="margin-top:12px"><h3>✧ Besondere Fähigkeit</h3><p>${escapeHTML(i.ability.desc)}</p><p class="${o.level>=3?"green":"muted"}">${o.level>=3?"Aktiv":"Wird auf Level 3 freigeschaltet."}</p></div>`:""}
+ <p class="note">Item-ID: ${String(id+1).padStart(4,"0")} · ${owned?"In deiner Sammlung":"Noch nicht entdeckt"}</p>`);
+}
+function renderAbilities(){const items=ITEMS.filter(i=>i.special),found=items.filter(i=>getOwned(i.id).level>=3).length;
+ $("abilitiesFound").textContent=`${found} / 100`;
+ $("offlineBonus").textContent=fmtDuration(getOfflineLimit());
+ $("multiplier").textContent="×"+getIncomeMultiplier().toLocaleString("de-DE",{maximumFractionDigits:2});
+ $("abilityGrid").innerHTML=items.map(i=>{const o=getOwned(i.id);return `<article class="item-card ${i.rarityClass}"><div class="rarity">${i.rarity.toUpperCase()}</div><div class="item-icon">${i.icon}</div><div class="item-name">${escapeHTML(i.name)}</div><p class="item-meta">${escapeHTML(i.ability.desc)}</p><div class="sep"></div><div class="row"><span>Level ${o.level||"—"}/3</span><strong class="${o.level>=3?"green":"muted"}">${o.level>=3?"AKTIV":"GESPERRT"}</strong></div><button class="btn" data-detail="${i.id}">Details</button></article>`}).join("");
+}
+function renderSecrets(){
+ $("secretGrid").innerHTML=SECRET_DEFS.map(s=>{
+  const unlocked=!!state.secrets[s.id];
+  return `<article class="card"><div class="item-icon">${unlocked?s.icon:"🔒"}</div><h3>${unlocked?escapeHTML(s.name):"Unbekanntes Geheimnis"}</h3><p>${unlocked?escapeHTML(s.desc):"Erfülle eine versteckte Bedingung, um dieses Geheimnis zu entdecken."}</p><div class="row"><span class="${unlocked?"green":"muted"}">${unlocked?"ENTDECKT":"VERSCHLOSSEN"}</span><strong class="gold">${unlocked?"+":""}${formatMoney(s.reward)}</strong></div>${unlocked?`<p class="note">Entdeckt: ${fmtDate(state.secrets[s.id].unlockedAt)}</p>`:""}</article>`;
+ }).join("");
+ const secretIds=Object.keys(state.secrets).length;
+ $("secretItems").innerHTML=secretIds?`<div class="card"><div class="big gold">${secretIds} / ${SECRET_DEFS.length}</div><p>Geheimnisse gefunden</p></div>`:`<div class="empty">Noch keine Geheimnisse entdeckt. Spiele weiter und probiere neue Dinge aus.</div>`;
+}
+function renderStats(){
+ $("statPlaytime").textContent=fmtDuration(state.stats.playSeconds);
+ $("statBoxes").textContent=state.totalBoxes.toLocaleString("de-DE");
+ $("statFound").textContent=uniqueCount();
+ $("statFusions").textContent=state.stats.fusions||0;
+ $("statIncome").textContent=formatMoney(incomePerSecond())+"/s";
+ $("statRichest").textContent=formatMoney(state.stats.richest||500);
+ $("statSecrets").textContent=secretCount();
+ $("statLevels").textContent=totalLevels();
+ const milestones=[
+  ["Erste Entdeckung",uniqueCount()>=1],["10 Item-Arten",uniqueCount()>=10],
+  ["100 Item-Arten",uniqueCount()>=100],["1.000 Item-Arten",uniqueCount()>=1000],
+  ["Erste Fusion",(state.stats.fusions||0)>=1],["Level 3",maxedCount()>=1],
+  ["100 Boxen",state.totalBoxes>=100],["100 % Codex",maxedCount()>=TOTAL]
+ ];
+ $("milestoneGrid").innerHTML=milestones.map(([name,ok])=>`<div class="card"><div class="row"><strong>${name}</strong><span class="${ok?"green":"muted"}">${ok?"✓ ERREICHT":"GESPERRT"}</span></div></div>`).join("");
+}
+function renderAll(){
+ renderHeader();renderHome();renderBoxes();renderCodex();renderGallery();renderFusion();renderAbilities();renderSecrets();renderStats();
+}
+
+/* Offline-Einkommen */
+function applyOfflineEarnings(){
+ const now=Date.now(),elapsed=Math.max(0,(now-(Number(state.lastSeen)||now))/1000);
+ const capped=Math.min(elapsed,getOfflineLimit()),earned=capped*incomePerSecond();
+ if(earned>0)state.money+=earned;
+ state.stats.richest=Math.max(state.stats.richest,state.money);
+ saveState();
+ if(elapsed>60){showModal("Willkommen zurück!",`<div class="reward">🌌</div><div class="grid"><div class="card"><p>Abwesend</p><div class="big">${fmtDuration(elapsed)}</div></div><div class="card"><p>Verdient</p><div class="big gold">${formatMoney(earned)}</div></div></div><p class="muted">Deine Sammlung hat während deiner Abwesenheit Einkommen erzeugt.</p>${elapsed>getOfflineLimit()?`<p class="note">Das Offline-Limit von ${fmtDuration(getOfflineLimit())} wurde erreicht.</p>`:""}`);
+ }
+}
+
+/* Export / Import / Reset */
+function exportSave(){
+ saveState();const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="lootverse-save.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ showToast("Spielstand exportiert.");
+}
+function resetGame(){
+ showModal("Spielstand zurücksetzen?",`<p>Deine Sammlung, Historie, Geheimnisse und dein Geld werden gelöscht.</p><p class="gold">Diese Aktion kann nicht rückgängig gemacht werden.</p><div class="actions"><button class="btn danger" id="confirmReset">Ja, alles löschen</button><button class="btn" id="cancelReset">Abbrechen</button></div>`);
+ $("confirmReset").onclick=()=>{
+  localStorage.removeItem(SAVE_KEY);state=defaultState();currentPage=1;galleryPage=1;
+  closeModal();renderAll();showPage("home");saveState();showToast("Spielstand zurückgesetzt.");
+ };
+ $("cancelReset").onclick=closeModal;
+}
+
+/* Ereignisse */
+$("nav").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)showPage(b.dataset.page)});
+document.addEventListener("click",e=>{
+ const go=e.target.closest("[data-goto]");if(go)showPage(go.dataset.goto);
+ const fuse=e.target.closest("[data-fuse]");if(fuse)fuseItem(Number(fuse.dataset.fuse));
+ const detail=e.target.closest("[data-detail]");if(detail)showItemDetails(Number(detail.dataset.detail));
+});
+$("toggleSidebar").onclick=()=>{
+ state.sidebarCollapsed=!state.sidebarCollapsed;
+ $("sidebar").classList.toggle("collapsed",state.sidebarCollapsed);saveState();
+};
+$("boxAmount").addEventListener("input",updateBoxCost);
+$("openBoxes").onclick=openBoxes;
+$("prevPage").onclick=()=>{currentPage--;renderCodex()};
+$("nextPage").onclick=()=>{currentPage++;renderCodex()};
+["searchItems","filterRarity","filterStatus","sortItems"].forEach(id=>$(id).addEventListener(id==="searchItems"?"input":"change",()=>{currentPage=1;renderCodex()}));
+$("gallerySearch").addEventListener("input",()=>{galleryPage=1;renderGallery()});
+["galleryFilter","gallerySort"].forEach(id=>$(id).addEventListener("change",()=>{galleryPage=1;renderGallery()}));
+$("galleryPrev").onclick=()=>{galleryPage--;renderGallery()};
+$("galleryNext").onclick=()=>{galleryPage++;renderGallery()};
+$("searchFusion").addEventListener("input",renderFusion);
+$("sortFusion").addEventListener("change",renderFusion);
+$("closeModal").onclick=closeModal;$("modalOk").onclick=closeModal;
+$("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+$("soundEnabled").addEventListener("change",e=>{state.soundEnabled=e.target.checked;saveState()});
+$("soundVolume").addEventListener("input",e=>{state.soundVolume=Number(e.target.value);$("volumeText").textContent=state.soundVolume+"%";saveState()});
+$("exportSave").onclick=exportSave;$("exportSave2").onclick=exportSave;
+$("resetAll").onclick=resetGame;$("resetAll2").onclick=resetGame;
+$("importSave").onclick=()=>$("importFile").click();
+$("importFile").addEventListener("change",async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const s=JSON.parse(await file.text());
+  if(!s||typeof s!=="object"||!s.inventory||typeof s.inventory!=="object")throw Error();const clean=defaultState();
+  state={...clean,...s,stats:{...clean.stats,...s.stats},inventory:{}};
+  state.money=Math.max(0,Number(s.money)||0);
+  state.totalBoxes=Math.max(0,Number(s.totalBoxes)||0);
+  for(const [id,o] of Object.entries(s.inventory)){
+   const n=Number(id);if(!Number.isInteger(n)||n<0||n>=TOTAL||!o)continue;
+   const count=Math.max(0,Math.floor(Number(o.count)||0));
+   const level=Math.max(1,Math.min(3,Math.floor(Number(o.level)||1)));
+   if(count>0)state.inventory[n]={...o,count,level,foundAt:o.foundAt||null,upgrades:Array.isArray(o.upgrades)?o.upgrades:[]};
+  }
+  state.lastSeen=Date.now();saveState();renderAll();showToast("Spielstand importiert.");
+ }catch(err){showToast("Import fehlgeschlagen: ungültige Datei.")}
+ e.target.value="";
+});
+
+/* Initialisierung */
+function init(){
+ loadState();
+ $("filterRarity").innerHTML='<option value="">Alle Seltenheiten</option>'+RARITIES.map((r,i)=>`<option value="${i}">${r.name}</option>`).join("");
+ $("soundEnabled").checked=state.soundEnabled;
+ $("soundVolume").value=state.soundVolume;
+ $("volumeText").textContent=state.soundVolume+"%";
+ $("sidebar").classList.toggle("collapsed",!!state.sidebarCollapsed);
+ applyOfflineEarnings();
+ checkSecrets();
+ renderAll();
+ lastTick=performance.now();
+ setInterval(()=>{
+  const now=performance.now(),delta=Math.min((now-lastTick)/1000,2);lastTick=now;
+  state.money+=incomePerSecond()*delta;
+  state.stats.playSeconds+=delta;
+  state.stats.richest=Math.max(state.stats.richest,state.money);
+  checkSecrets();renderHeader();updateBoxCost();
+ },1000);
+ setInterval(saveState,10000);
+ document.addEventListener("visibilitychange",()=>{if(document.hidden)saveState()});
+ window.addEventListener("beforeunload",saveState);
+}
+init();
+</script>
+</body>
+</html>
